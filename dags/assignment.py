@@ -64,6 +64,34 @@ def _run(cmd: list[str], extra_env: Optional[dict] = None, cwd: Optional[str] = 
             p.returncode, cmd, p.stdout, p.stderr)
 
 
+def _dbt_cmd(*subcommand: str, vars_yaml: Optional[str] = None) -> list[str]:
+    """Build a dbt CLI command that shares the standard project/profile flags."""
+    cmd = [
+        "dbt",
+        *subcommand,
+        "--profiles-dir",
+        DBT_PROFILES_DIR,
+        "--project-dir",
+        DBT_PROJECT_DIR,
+    ]
+    if vars_yaml:
+        cmd.extend(["--vars", vars_yaml])
+    return cmd
+
+
+def _dbt_vars(csv_uri: Optional[str]) -> Optional[str]:
+    """Return the YAML payload for dbt ``--vars`` when a CSV path is provided."""
+    if not csv_uri:
+        return None
+    safe = csv_uri.replace("'", "''")  # YAML single quotes; escape internal ones
+    return f"csv_uri: '{safe}'"
+
+
+def _run_dbt(*subcommand: str, csv_uri: Optional[str] = None) -> None:
+    """Execute a dbt CLI command with optional ``csv_uri`` propagated via ``--vars``."""
+    _run(_dbt_cmd(*subcommand, vars_yaml=_dbt_vars(csv_uri)))
+
+
 def _ensure_dirs() -> None:
     """Ensure temporary and raw directories exist."""
     TMP_DIR.mkdir(parents=True, exist_ok=True)
@@ -129,10 +157,8 @@ with DAG(
         def dbt_debug_deps():
             # Debug/Deps
             _run(["dbt", "--version"])
-            _run(["dbt", "debug", "--profiles-dir", DBT_PROFILES_DIR,
-                  "--project-dir", DBT_PROJECT_DIR])
-            _run(["dbt", "deps", "--profiles-dir", DBT_PROFILES_DIR,
-                  "--project-dir", DBT_PROJECT_DIR])
+            _run(_dbt_cmd("debug"))
+            _run(_dbt_cmd("deps"))
 
         # === Run & Test ===
 
@@ -141,26 +167,11 @@ with DAG(
               retry_delay=timedelta(seconds=10),
               execution_timeout=timedelta(minutes=10))
         def dbt_run_test(csv_uri: Optional[str] = None):
-            # Only add --vars when we have something to pass
-            vars_yaml = None
-            if csv_uri:
-                # YAML single quotes; escape internal single quotes
-                safe = csv_uri.replace("'", "''")
-                vars_yaml = f"csv_uri: '{safe}'"
-
             # dbt run
-            cmd = ["dbt", "run", "--profiles-dir",
-                   DBT_PROFILES_DIR, "--project-dir", DBT_PROJECT_DIR]
-            if vars_yaml:
-                cmd += ["--vars", vars_yaml]
-            _run(cmd)
+            _run_dbt("run", csv_uri=csv_uri)
 
             # dbt test
-            cmd = ["dbt", "test", "--profiles-dir",
-                   DBT_PROFILES_DIR, "--project-dir", DBT_PROJECT_DIR]
-            if vars_yaml:
-                cmd += ["--vars", vars_yaml]
-            _run(cmd)
+            _run_dbt("test", csv_uri=csv_uri)
 
         # === Generate Docs ===
 
@@ -169,17 +180,7 @@ with DAG(
               retry_delay=timedelta(seconds=10),
               execution_timeout=timedelta(minutes=10))
         def dbt_docs_generate(csv_uri: Optional[str] = None):
-            vars_yaml = None
-            if csv_uri:
-                safe = csv_uri.replace("'", "''")  # YAML-safe single quotes
-                vars_yaml = f"csv_uri: '{safe}'"
-
-            cmd = ["dbt", "docs", "generate",
-                   "--profiles-dir", DBT_PROFILES_DIR,
-                   "--project-dir", DBT_PROJECT_DIR]
-            if vars_yaml:
-                cmd += ["--vars", vars_yaml]
-            _run(cmd)
+            _run_dbt("docs", "generate", csv_uri=csv_uri)
 
         # flow control
         dbg = dbt_debug_deps()
