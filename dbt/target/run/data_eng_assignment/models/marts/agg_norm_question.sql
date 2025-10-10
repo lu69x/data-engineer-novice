@@ -27,9 +27,6 @@ select
   b.low_ci as confidence_value_low,
   b.high_ci as confidence_value_high,
 
-  -- -- พิกัด & ไอดีต่าง ๆ
-  -- b.location_id as location_id,
-
   -- ข้อมูลจากตารางมิติคำถาม
   b.question_id as question_id,
   q.question as question_text,

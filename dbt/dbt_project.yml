@@ -10,7 +10,10 @@ seed-paths: ["seeds"]
 target-path: "target"
 clean-targets: ["target", "dbt_packages"]
 
-# ค่าเริ่มต้น
+vars:
+  # The `csv_uri` variable will be accessible in all resources
+  csv_uri: ''
+
 models:
   data_eng_assignment:              # <<< ต้องตรงกับ name ด้านบน
     +materialized: view             # ค่า default สำหรับทั้งโปรเจกต์ (จะถูก override ด้านล่าง)
@@ -24,19 +27,5 @@ models:
     dim:
       +materialized: table
 
-    marts:
-      +materialized: table
-      # ✅ Export Parquet ไปเก็บใน /data/parquet หลังรันเสร็จ
-      +post-hook:
-        - |
-          {% set base_path = var('parquet_path', env_var('PARQUET_PATH', '/data/parquet')) %}
-          {% if not base_path.endswith('/') %}
-            {% set base_path = base_path + '/' %}
-          {% endif %}
-
-          -- ใช้ DuckDB COPY EXPORT ออกเป็น Parquet ไฟล์
-          copy (
-            select * from {{ this }}
-          )
-          to '{{ base_path }}{{ this.name }}.parquet'
-          (format parquet, overwrite_or_ignore);
+    # marts:
+    #   +materialized: table

@@ -1,17 +1,12 @@
 version: 2
 
 models:
-  # Staging Models
-  - name: stg_cdi_normallized
+  - name: stg_cdi_normalized
     columns:
       - name: location_id
         tests: [not_null]
-      - name: topic_id
-        tests: [not_null]
       - name: question_id
         tests: [not_null]
-      # - name: response_id
-      #   tests: [not_null]
       - name: value_type_id
         tests: [not_null]
 

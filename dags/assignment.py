@@ -160,8 +160,8 @@ with DAG(
             _run(_dbt_cmd("debug"))
             _run(_dbt_cmd("deps"))
 
-        # === Run & Test ===
 
+        # === Run & Test ===
         @task(task_id="dbt_run_test",
               retries=2,
               retry_delay=timedelta(seconds=10),
@@ -172,9 +172,9 @@ with DAG(
 
             # dbt test
             _run_dbt("test", csv_uri=csv_uri)
+            
 
         # === Generate Docs ===
-
         @task(task_id="dbt_docs_generate",
               retries=2,
               retry_delay=timedelta(seconds=10),
