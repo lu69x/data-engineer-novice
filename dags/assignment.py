@@ -11,9 +11,9 @@ import json
 import pendulum
 import requests
 from airflow.sdk import DAG, task, task_group  # Airflow 3 public API
-from airflow.exceptions import AirflowSkipException
-from airflow.providers.standard.operators.bash import BashOperator
-from airflow.providers.standard.operators.empty import EmptyOperator
+# from airflow.exceptions import AirflowSkipException
+# from airflow.providers.standard.operators.bash import BashOperator
+# from airflow.providers.standard.operators.empty import EmptyOperator
 
 
 # ---------------- Local (เฉพาะ temp) ----------------
@@ -192,4 +192,4 @@ with DAG(
     path_file = ingest_file()
     tg = transform_dbt(file_uri=path_file)   # ✅ pass XComArg into group param
     # # explicit dependency (optional but clear)
-    # path_file >> tg
+    path_file >> tg

@@ -2,9 +2,6 @@ version: 2
 
 models:
   # Staging Models
-  - name: stg_cdi_raw
-
-  
   - name: stg_cdi_normallized
     columns:
       - name: location_id

@@ -1,12 +1,5 @@
 
 
--- -- Base CTE to clean and prepare data
--- with b as (
---   select *
---   from "warehouse"."analytics_analytics"."stg_cdi_normalized"
---   where value is not null
--- )
-
 select 
   -- ระบุช่วงปี
   b.year as start_year,
