@@ -1,0 +1,8 @@
+
+  
+  create view "warehouse"."analytics_analytics"."stg_cdi_raw__dbt_tmp" as (
+    
+
+select *
+from read_csv_auto('/opt/airflow/data/raw/cdc_data.csv')
+  );
