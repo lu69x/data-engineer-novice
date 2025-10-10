@@ -1,4 +1,0 @@
-{% set csv_path = var('csv_uri') %}
-
-select *
-from read_csv_auto('{{ csv_path }}')
