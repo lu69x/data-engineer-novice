@@ -1,0 +1,56 @@
+version: 2
+
+models:
+  - name: stg_cdi_normalized
+    columns:
+      - name: location_id
+        tests: [not_null]
+      - name: question_id
+        tests: [not_null]
+      - name: value_type_id
+        tests: [not_null]
+
+  - name: dim_location
+    columns:
+      - name: location_id
+        tests: [not_null, unique]
+
+  - name: dim_topic
+    columns:
+      - name: topic_id
+        tests: [not_null, unique]
+
+  - name: dim_question
+    columns:
+      - name: question_id
+        tests: [not_null, unique]
+      - name: topic_id
+        tests:
+          - relationships:
+              to: ref('dim_topic')
+              field: topic_id
+
+  - name: dim_response
+    columns:
+      - name: response_id
+        tests: [unique]   # อาจว่างได้ เลยไม่ใส่ not_null
+
+  - name: dim_value_type
+    columns:
+      - name: value_type_id
+        tests: [not_null]
+
+  - name: dim_strat_category
+    columns:
+      - name: strat_cat_id
+        tests: [not_null, unique]
+
+  - name: dim_strat_value
+    columns:
+      - name: strat_id
+        tests: [not_null]
+      - name: strat_cat_id
+        tests:
+          - relationships:
+              to: ref('dim_strat_category')
+              field: strat_cat_id
