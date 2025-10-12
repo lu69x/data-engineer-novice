@@ -9,7 +9,7 @@ usage() {
     cat <<'USAGE'
 Usage: ./setup.sh [-f|--force]
 
-Generate or update the .env file with the required Airflow/MinIO parameters.
+Generate or update the .env file with the required Airflow parameters.
 
 Options:
   -f, --force    Overwrite values without prompting (useful for CI).
@@ -68,17 +68,6 @@ AIRFLOW_PROJ_DIR=$(final_value AIRFLOW_PROJ_DIR)
 # --- Observability / Docs ---
 DBT_DOCS_PORT=$(final_value DBT_DOCS_PORT)
 
-# # --- MinIO / S3 Configuration ---
-# S3_ENDPOINT_URL=$(final_value S3_ENDPOINT_URL)
-# S3_ACCESS_KEY_ID=$(final_value S3_ACCESS_KEY_ID)
-# S3_SECRET_ACCESS_KEY=$(final_value S3_SECRET_ACCESS_KEY)
-# S3_REGION=$(final_value S3_REGION)
-# S3_ADDRESSING_STYLE=$(final_value S3_ADDRESSING_STYLE)
-# S3_BUCKET=$(final_value S3_BUCKET)
-# S3_RAW_PREFIX=$(final_value S3_RAW_PREFIX)
-# S3_PARQUET_PREFIX=$(final_value S3_PARQUET_PREFIX)
-# S3_PREFIX=$(final_value S3_PREFIX)
-# S3_DOCS_PREFIX=$(final_value S3_DOCS_PREFIX)
 EOF
 }
 
@@ -116,16 +105,6 @@ keys=(
     AIRFLOW_GID
     AIRFLOW_PROJ_DIR
     DBT_DOCS_PORT
-    # S3_ENDPOINT_URL
-    # S3_ACCESS_KEY_ID
-    # S3_SECRET_ACCESS_KEY
-    # S3_REGION
-    # S3_ADDRESSING_STYLE
-    # S3_BUCKET
-    # S3_RAW_PREFIX
-    # S3_PARQUET_PREFIX
-    # S3_PREFIX
-    # S3_DOCS_PREFIX
 )
 
 default_for() {
@@ -134,16 +113,6 @@ default_for() {
         AIRFLOW_GID) id -g ;;
         AIRFLOW_PROJ_DIR) printf '.' ;;
         DBT_DOCS_PORT) printf '8082' ;;
-        # S3_ENDPOINT_URL) printf 'http://minio:9000' ;;
-        # S3_ACCESS_KEY_ID) printf 'admin' ;;
-        # S3_SECRET_ACCESS_KEY) printf 'admin123456' ;;
-        # S3_REGION) printf 'us-east-1' ;;
-        # S3_ADDRESSING_STYLE) printf 'path' ;;
-        # S3_BUCKET) printf 'warehouse' ;;
-        # S3_RAW_PREFIX) printf 'assignment/raw' ;;
-        # S3_PARQUET_PREFIX) printf 'assignment/parquet' ;;
-        # S3_PREFIX) printf 'assignment/parquet' ;;
-        # S3_DOCS_PREFIX) printf 'assignment/docs' ;;
         *) return 1 ;;
     esac
 }
@@ -167,7 +136,4 @@ cat <<EOF
    AIRFLOW_UID=$(final_value AIRFLOW_UID)
    AIRFLOW_GID=$(final_value AIRFLOW_GID)
    DBT_DOCS_PORT=$(final_value DBT_DOCS_PORT)
-   S3_BUCKET=$(final_value S3_BUCKET)
-   S3_PARQUET_PREFIX=$(final_value S3_PARQUET_PREFIX)
-   S3_DOCS_PREFIX=$(final_value S3_DOCS_PREFIX)
 EOF

@@ -8,7 +8,7 @@
 โปรเจกต์นี้สร้างขึ้นเพื่อฝึกพื้นฐานงาน **Data Engineering** ในสภาพแวดล้อมจริง  
 มุ่งเน้นให้เข้าใจภาพรวมของ **ETL/ELT Workflow** — ตั้งแต่การดึงข้อมูล (Extract)  
 → แปลงข้อมูล (Transform) → จัดการงานแบบอัตโนมัติ (Orchestrate) ด้วย  
-**Apache Airflow**, **DBT**, **PostgreSQL**, และ **MinIO**
+**Apache Airflow**, **DBT**, **PostgreSQL**, และ **DuckDB**
 
 ---
 
@@ -41,7 +41,7 @@ data-engineer-novice/
 |:------|:-----|:---------|
 | **Orchestration** | Apache Airflow 3.x | Schedule & manage data pipelines |
 | **Transformation** | DBT Core | SQL modeling, testing, and documentation |
-| **Storage** | PostgreSQL / MinIO | Data warehouse & raw object storage |
+| **Storage** | PostgreSQL (Airflow metadata) / DuckDB | Metadata DB & analytics warehouse |
 | **Compute** | Docker Compose | Local orchestration and isolation |
 | **Monitoring** | Flower | Celery task monitoring dashboard |
 
@@ -73,7 +73,6 @@ docker compose --profile flower up -d
 | 🌐 Airflow Web UI | [http://localhost:8080](http://localhost:8080) |
 | 🌼 Flower Dashboard | [http://localhost:5555](http://localhost:5555) |
 | 🐘 PostgreSQL | localhost:5432 |
-| 🪣 MinIO Console | [http://localhost:9001](http://localhost:9001) |
 
 ---
 
