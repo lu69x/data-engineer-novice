@@ -42,6 +42,9 @@ dbt/logs/
 dbt/warehouse.duckdb
 dbt/profiles/*.user.yml
 
+# Iceberg
+iceberg/
+
 # minio
 minio/.*
 minio/

@@ -72,7 +72,11 @@ docker compose --profile flower up -d
 |----------|-----|
 | 🌐 Airflow Web UI | [http://localhost:8080](http://localhost:8080) |
 | 🌼 Flower Dashboard | [http://localhost:5555](http://localhost:5555) |
-| 🐘 PostgreSQL | localhost:5432 |
+| 🔥 Spark UI | [http://localhost:8081](http://localhost:8081) |
+| 📓 Jupyter (Spark) | [http://localhost:8888](http://localhost:8888) |
+| 🧊 Iceberg REST | [http://localhost:8181](http://localhost:8181) |
+| 🗄️ MinIO Console | [http://localhost:9001](http://localhost:9001) |
+| 🪣 MinIO S3 Endpoint | [http://localhost:9000](http://localhost:9000) |
 
 ---
 
