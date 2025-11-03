@@ -1,4 +1,4 @@
--- models/staging/stg_cdi_normalized.sql
+-- models/staging/fact_cdi_normalized.sql
 select
   -- ระบุช่วงปี
   year,

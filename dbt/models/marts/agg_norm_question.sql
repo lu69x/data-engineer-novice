@@ -24,6 +24,6 @@ select
   q.topic_id as topic_id,
   t.topic as topic_text
   
-from {{ ref('stg_cdi_normalized') }} as b
+from {{ ref('fact_cdi_normalized') }} as b
 left join {{ ref('dim_question') }} as q on q.question_id = b.question_id
 left join {{ ref('dim_topic') }} as t on t.topic_id = q.topic_id

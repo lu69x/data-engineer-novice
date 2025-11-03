@@ -87,9 +87,13 @@ DBT_DOCS_PORT=$(final_value DBT_DOCS_PORT)
 DBT_PROFILE_NAME=$(final_value DBT_PROFILE_NAME)
 DBT_TARGET=$(final_value DBT_TARGET)
 DBT_SCHEMA=$(final_value DBT_SCHEMA)
-DBT_DUCKDB_PATH=$(final_value DBT_DUCKDB_PATH)
+DBT_LOCATION=$(final_value DBT_LOCATION)
 DBT_THREADS=$(final_value DBT_THREADS)
 CSV_URI=$(final_value CSV_URI)
+
+# --- AWS Settings for dbt Glue Catalog Access ---
+DBT_ROLE_ARN=$(final_value DBT_ROLE_ARN)
+DBT_REGION=$(final_value DBT_REGION)
 
 # _PIP_ADDITIONAL_REQUIREMENTS="-r /opt/airflow/requirements.txt"
 EOF
@@ -142,7 +146,9 @@ keys=(
     DBT_PROFILE_NAME
     DBT_TARGET
     DBT_SCHEMA
-    DBT_DUCKDB_PATH
+    DBT_LOCATION
+    DBT_ROLE_ARN
+    DBT_REGION
     DBT_THREADS
     CSV_URI
 )
@@ -166,7 +172,9 @@ default_for() {
         DBT_PROFILE_NAME) printf 'data_eng_assignment' ;;
         DBT_TARGET) printf 'dev' ;;
         DBT_SCHEMA) printf 'analytics' ;;
-        DBT_DUCKDB_PATH) printf '/opt/airflow/dbt/warehouse.duckdb' ;;
+        DBT_LOCATION) printf '/opt/airflow/dbt/warehouse.duckdb' ;;
+        DBT_ROLE_ARN) printf 'arn:aws:iam::<ACCOUNT_ID>:role/GlueInteractiveSessionRole' ;;
+        DBT_REGION) printf 'ap-southeast-1' ;;
         DBT_THREADS) printf 1 ;;
         CSV_URI) printf '' ;;
         *) return 1 ;;
@@ -189,9 +197,18 @@ update_env_file
 
 cat <<EOF
 ✅ $ENV_FILE is ready!
-   AIRFLOW_UID=$(final_value AIRFLOW_UID)  AIRFLOW_GID=$(final_value AIRFLOW_GID)
+   AIRFLOW_UID=$(final_value AIRFLOW_UID)  
+   AIRFLOW_GID=$(final_value AIRFLOW_GID)
    AIRFLOW_PROJ_DIR=$(final_value AIRFLOW_PROJ_DIR)
    AIRFLOW_DATA_DIR=$(final_value AIRFLOW_DATA_DIR)
-   DBT_PROJECT_DIR=$(final_value DBT_PROJECT_DIR)  DBT_PROFILES_DIR=$(final_value DBT_PROFILES_DIR)
-   DBT_DOCS_PORT=$(final_value DBT_DOCS_PORT)  DBT_TARGET=$(final_value DBT_TARGET)
+   DBT_PROJECT_DIR=$(final_value DBT_PROJECT_DIR)  
+   DBT_PROFILES_DIR=$(final_value DBT_PROFILES_DIR)
+   DBT_DOCS_PORT=$(final_value DBT_DOCS_PORT)  
+   DBT_TARGET=$(final_value DBT_TARGET)
+   DBT_SCHEMA=$(final_value DBT_SCHEMA)
+   DBT_LOCATION=$(final_value DBT_LOCATION)
+   DBT_ROLE_ARN=$(final_value DBT_ROLE_ARN)
+   DBT_REGION=$(final_value DBT_REGION)
+   DBT_THREADS=$(final_value DBT_THREADS)
+   CSV_URI=$(final_value CSV_URI)
 EOF

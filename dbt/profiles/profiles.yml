@@ -9,13 +9,25 @@ data_eng_assignment:
     #   extensions: [httpfs, parquet, json, iceberg]
     dev:
       type: duckdb
-      path: "{{ env_var('DBT_DUCKDB_PATH', '/opt/airflow/dbt/warehouse.duckdb') }}"
+      path: "{{ env_var('DBT_LOCATION', '/opt/airflow/dbt/warehouse.duckdb') }}"
       schema: "{{ env_var('DBT_SCHEMA', 'analytics') }}"
-      threads: "{{ env_var('DBT_THREADS', 1) }}"
+      threads: "{{ env_var('DBT_THREADS', 1) | int }}"
       extensions: [httpfs, parquet, json, iceberg]
     prod:
-      type: duckdb
-      path: "{{ env_var('DBT_DUCKDB_PATH', '/opt/airflow/dbt/warehouse.duckdb') }}"
+      type: glue
+      role_arn: "{{ env_var('DBT_ROLE_ARN', 'arn:aws:iam::<ACCOUNT_ID>:role/GlueInteractiveSessionRole') }}"
+      region: "{{ env_var('DBT_REGION', 'ap-southeast-1') }}"
+      threads: "{{ env_var('DBT_THREADS', 1) | int }}"
+
+      # database name ใน Glue Catalog
       schema: "{{ env_var('DBT_SCHEMA', 'analytics') }}"
-      threads: "{{ env_var('DBT_THREADS', 1) }}"
-      extensions: [httpfs, parquet, json, iceberg]
+
+      # path ใน S3 ที่ใช้เก็บผลลัพธ์ของ dbt models
+      location: "{{ env_var('DBT_LOCATION', 's3://<your-bucket>/datalake/glue_poc/') }}"
+
+      # การตั้งค่า Spark / Glue Interactive Session
+      glue_version: "4.0"
+      worker_type: G.1X
+      workers: 2
+      idle_timeout: 10
+      session_provisioning_timeout_in_seconds: 300

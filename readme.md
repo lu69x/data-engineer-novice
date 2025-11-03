@@ -55,7 +55,7 @@ data-engineer-novice/
   - `DBT_PROFILE_NAME` (default: `data_eng_assignment`)
   - `DBT_TARGET` (default: `dev`) → matches a profile output
   - `DBT_SCHEMA` (default: `analytics`)
-  - `DBT_DUCKDB_PATH` (default: `/opt/airflow/dbt/warehouse.duckdb`)
+  - `DBT_LOCATION` (default: `/opt/airflow/dbt/warehouse.duckdb`)
   - `DBT_THREADS` (default: `4`)
   - `CSV_URI` (optional) → default for `vars.csv_uri` in dbt_project.yml; the DAG passes the file path dynamically at runtime
 
@@ -226,7 +226,7 @@ flowchart LR
 | --- | --- | --- | --- | --- |
 | Staging | `stg_cdi_raw` | อ่านข้อมูลดิบจากไฟล์ CSV ที่กำหนดผ่านตัวแปรโครงการ | `var('csv_uri')` → `read_csv_auto` | ตารางดิบทุกคอลัมน์จากไฟล์ต้นฉบับ เพื่อใช้เป็นฐานสำหรับการทำความสะอาด | 
 | Staging | `stg_cdi_clean` | ทำความสะอาดและปรับรูปแบบข้อมูล เช่น แปลงค่าที่เป็นสตริงให้เป็นตัวเลข, ดึงปี, สถานที่, เมทาดาต้า และค่าสถิติต่าง ๆ | อ้างอิง `stg_cdi_raw` | ตารางสะอาดพร้อมคอลัมน์ปี สถานที่ เมทาดาต้า ค่าตัวเลขที่ normalize แล้ว ค่าความเชื่อมั่น พิกัด และข้อมูล stratification | 
-| Staging | `stg_cdi_normalized` | เลือกเฉพาะฟิลด์ที่ผ่านการ normalize แล้วเพื่อเตรียมใช้ในมิติและมาร์ต | อ้างอิง `stg_cdi_clean` | ตารางคอลัมน์ที่พร้อมเชื่อมกับมิติต่าง ๆ เช่น location/question/response/value type และ stratification | 
+| Staging | `fact_cdi_normalized` | เลือกเฉพาะฟิลด์ที่ผ่านการ normalize แล้วเพื่อเตรียมใช้ในมิติและมาร์ต | อ้างอิง `stg_cdi_clean` | ตารางคอลัมน์ที่พร้อมเชื่อมกับมิติต่าง ๆ เช่น location/question/response/value type และ stratification | 
 | Dimensions | `dim_topic` | สร้างตารางมิติเพื่อจัดกลุ่มคำถามตามหัวข้อ | `stg_cdi_clean` | รายการ `topic_id`–`topic` ที่ไม่ซ้ำ | 
 | Dimensions | `dim_question` | สร้างตารางมิติคำถามเพื่อใช้เชื่อมกับแฟกต์ | `stg_cdi_clean` | รายการ `question_id`–`question` พร้อม `topic_id` | 
 | Dimensions | `dim_response` | รวบรวมคำตอบที่เป็นไปได้สำหรับคำถาม | `stg_cdi_clean` | รายการ `response_id`–`response` ที่ไม่ซ้ำ | 
@@ -234,8 +234,8 @@ flowchart LR
 | Dimensions | `dim_value_type` | จัดเก็บเมทาดาต้าเกี่ยวกับชนิดค่าและหน่วย | `stg_cdi_clean` | รายการ `value_type_id`–`value_type`–`unit` | 
 | Dimensions | `dim_strat_category` | รวมหมวดหมู่การแบ่งกลุ่ม (stratification categories) ทุกลำดับ | `stg_cdi_clean` | รายการ `strat_cat_id`–`strat_cat` ที่ไม่ซ้ำ | 
 | Dimensions | `dim_strat_value` | รวมค่าการแบ่งกลุ่ม (stratification values) ทุกลำดับ | `stg_cdi_clean` | รายการ `strat_cat_id`–`strat_id`–`strat` ที่ไม่ซ้ำ | 
-| Marts | `agg_norm_question` | สร้างตารางแฟกต์ที่เชื่อมข้อมูล normalized กับมิติคำถาม/หัวข้อ เพื่อการวิเคราะห์ตามคำถาม | `stg_cdi_normalized`, `dim_question`, `dim_topic` | ผลลัพธ์ประกอบด้วยปี ค่าที่ normalize แล้ว ช่วงความเชื่อมั่น และรายละเอียดคำถาม/หัวข้อ | 
-| Marts | `agg_norm_location` | สร้างตารางแฟกต์ที่ผูกข้อมูล normalized กับมิติพื้นที่ | `stg_cdi_normalized`, `dim_location` | แฟกต์ที่รวมข้อมูล normalized พร้อมรายละเอียดพื้นที่ | 
+| Marts | `agg_norm_question` | สร้างตารางแฟกต์ที่เชื่อมข้อมูล normalized กับมิติคำถาม/หัวข้อ เพื่อการวิเคราะห์ตามคำถาม | `fact_cdi_normalized`, `dim_question`, `dim_topic` | ผลลัพธ์ประกอบด้วยปี ค่าที่ normalize แล้ว ช่วงความเชื่อมั่น และรายละเอียดคำถาม/หัวข้อ | 
+| Marts | `agg_norm_location` | สร้างตารางแฟกต์ที่ผูกข้อมูล normalized กับมิติพื้นที่ | `fact_cdi_normalized`, `dim_location` | แฟกต์ที่รวมข้อมูล normalized พร้อมรายละเอียดพื้นที่ | 
 
 ---
 

@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: stg_cdi_normalized
+  - name: fact_cdi_normalized
     columns:
       - name: location_id
         tests: [not_null]
