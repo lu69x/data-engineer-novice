@@ -1,9 +1,21 @@
 data_eng_assignment:
-  target: dev
+  target: "{{ env_var('DBT_TARGET', 'dev') }}"
   outputs:
+    # dev:
+    #   type: duckdb
+    #   path: /opt/airflow/dbt/warehouse.duckdb   # << path ของ DuckDB file
+    #   schema: analytics
+    #   threads: 4
+    #   extensions: [httpfs, parquet, json, iceberg]
     dev:
       type: duckdb
-      path: /opt/airflow/dbt/warehouse.duckdb   # << path ของ DuckDB file
-      schema: analytics
-      threads: 4
+      path: "{{ env_var('DBT_DUCKDB_PATH', '/opt/airflow/dbt/warehouse.duckdb') }}"
+      schema: "{{ env_var('DBT_SCHEMA', 'analytics') }}"
+      threads: "{{ env_var('DBT_THREADS', 1) }}"
+      extensions: [httpfs, parquet, json, iceberg]
+    prod:
+      type: duckdb
+      path: "{{ env_var('DBT_DUCKDB_PATH', '/opt/airflow/dbt/warehouse.duckdb') }}"
+      schema: "{{ env_var('DBT_SCHEMA', 'analytics') }}"
+      threads: "{{ env_var('DBT_THREADS', 1) }}"
       extensions: [httpfs, parquet, json, iceberg]

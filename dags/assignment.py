@@ -11,29 +11,13 @@ import json
 import pendulum
 import requests
 from airflow.sdk import DAG, task, task_group  # Airflow 3 public API
+from config import settings
 # from airflow.exceptions import AirflowSkipException
 # from airflow.providers.standard.operators.bash import BashOperator
 # from airflow.providers.standard.operators.empty import EmptyOperator
 
 
-# ---------------- Local (เฉพาะ temp) ----------------
-AIRFLOW_DATA_DIR = os.getenv("AIRFLOW_DATA_DIR", "/opt/airflow/data")
-TMP_DIR = Path(os.getenv("TMP_DIR", f"{AIRFLOW_DATA_DIR}/tmp"))
-RAW_DIR = Path(os.getenv("RAW_DIR", f"{AIRFLOW_DATA_DIR}/raw"))
-CSV_NAME = os.getenv("CSV_NAME", "cdc_data.csv")
-CSV_URL = os.getenv(
-    "CSV_URL", "https://data.cdc.gov/api/views/hksd-2xuw/rows.csv?accessType=DOWNLOAD")
-
-# ---------------- dbt config ----------------
-DBT_PROFILES_DIR = os.getenv("DBT_PROFILES_DIR", "/opt/airflow/dbt/profiles")
-DBT_PROJECT_DIR = os.getenv("DBT_PROJECT_DIR", "/opt/airflow/dbt")
-DBT_DOCS_PORT = os.getenv("DBT_DOCS_PORT", "8082")
-
-# ---------------- HTTP config ----------------
-HTTP_TIMEOUT_CONNECT = int(os.getenv("HTTP_TIMEOUT_CONNECT", "5"))
-HTTP_TIMEOUT_READ = int(os.getenv("HTTP_TIMEOUT_READ", "30"))
-HTTP_TIMEOUT = (HTTP_TIMEOUT_CONNECT, HTTP_TIMEOUT_READ)
-CHUNK_SIZE = int(os.getenv("HTTP_CHUNK_SIZE", str(1 << 14)))  # 16KB
+"""Centralized, dynamic config for env + dbt settings via config.Settings."""
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +28,7 @@ def _run(cmd: list[str], extra_env: Optional[dict] = None, cwd: Optional[str] = 
     if extra_env:
         env.update(extra_env)
     if cwd is None:
-        cwd = DBT_PROJECT_DIR
+        cwd = settings.dbt_project_dir
 
     logger.info("[cmd] %s", " ".join(cmd))
     p = subprocess.run(
@@ -70,9 +54,9 @@ def _dbt_cmd(*subcommand: str, vars_yaml: Optional[str] = None) -> list[str]:
         "dbt",
         *subcommand,
         "--profiles-dir",
-        DBT_PROFILES_DIR,
+        settings.dbt_profiles_dir,
         "--project-dir",
-        DBT_PROJECT_DIR,
+        settings.dbt_project_dir,
     ]
     if vars_yaml:
         cmd.extend(["--vars", vars_yaml])
@@ -94,8 +78,8 @@ def _run_dbt(*subcommand: str, csv_uri: Optional[str] = None) -> None:
 
 def _ensure_dirs() -> None:
     """Ensure temporary and raw directories exist."""
-    TMP_DIR.mkdir(parents=True, exist_ok=True)
-    RAW_DIR.mkdir(parents=True, exist_ok=True)
+    settings.tmp_dir.mkdir(parents=True, exist_ok=True)
+    settings.raw_dir.mkdir(parents=True, exist_ok=True)
 
 
 # ===== DAG =====
@@ -106,7 +90,7 @@ with DAG(
     catchup=False,
     tags=["assignment"],
     params={
-        "csv_url": CSV_URL,
+        "csv_url": settings.csv_url,
         "force_download": False,
     },
 ) as dag:
@@ -120,20 +104,22 @@ with DAG(
         _ensure_dirs()
         force_flag = bool(force) if force is not None else bool(
             dag.params.get("force_download", False))
-        url = csv_url or str(dag.params.get("csv_url") or CSV_URL)
+        url = csv_url or str(dag.params.get("csv_url") or settings.csv_url)
 
-        final_path = RAW_DIR / CSV_NAME
+        final_path = settings.raw_dir / settings.csv_name
         if final_path.exists() and not force_flag:
             logger.info("[ingest_file] file already exists: %s", final_path)
             return str(final_path)  # ✅ no skip, downstream will run
 
-        tmp_path = TMP_DIR / (CSV_NAME + ".part")
+        tmp_path = settings.tmp_dir / (settings.csv_name + ".part")
         headers = {"User-Agent": "apache-airflow/3.1.0"}
         with requests.Session() as session:
-            with session.get(url, headers=headers, stream=True, timeout=HTTP_TIMEOUT) as r:
+            with session.get(
+                url, headers=headers, stream=True, timeout=settings.http_timeout
+            ) as r:
                 r.raise_for_status()
                 with tmp_path.open("wb") as f:
-                    for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
+                    for chunk in r.iter_content(chunk_size=settings.http_chunk_size):
                         if chunk:
                             f.write(chunk)
 

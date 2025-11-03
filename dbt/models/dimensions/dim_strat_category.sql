@@ -1,4 +1,4 @@
-{{ config(materialized='view') }}
+{{ config(materialized='table') }}
 
 with cats as (
   select strat_cat_id1 as strat_cat_id, strat_cat1 as strat_cat from {{ ref('stg_cdi_clean') }} where strat_cat_id1 is not null

@@ -3,7 +3,7 @@ name: data_eng_assignment
 version: "1.0"
 config-version: 2
 
-profile: data_eng_assignment
+profile: "{{ env_var('DBT_PROFILE_NAME', 'data_eng_assignment') }}"
 
 model-paths: ["models"]
 seed-paths: ["seeds"]
@@ -12,12 +12,12 @@ clean-targets: ["target", "dbt_packages"]
 
 vars:
   # The `csv_uri` variable will be accessible in all resources
-  csv_uri: ''
+  csv_uri: "{{ env_var('CSV_URI', '') }}"
 
 models:
   data_eng_assignment:              # <<< ต้องตรงกับ name ด้านบน
     +materialized: view             # ค่า default สำหรับทั้งโปรเจกต์ (จะถูก override ด้านล่าง)
-    +schema: analytics              # ใส่ schema รวม (ปรับตามต้องการ)
+    +schema: "{{ env_var('DBT_SCHEMA', 'analytics') }}"  # ใส่ schema รวม (ปรับตามต้องการ)
 
     staging:
       +materialized: view           # ชั้น staging เป็น view

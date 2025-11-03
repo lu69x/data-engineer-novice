@@ -35,6 +35,34 @@ data-engineer-novice/
 
 ---
 
+## ⚙️ Configuration
+
+- Paths and ingestion
+  - `AIRFLOW_DATA_DIR` (default: `/opt/airflow/data`)
+  - `TMP_DIR` (default: `$AIRFLOW_DATA_DIR/tmp`)
+  - `RAW_DIR` (default: `$AIRFLOW_DATA_DIR/raw`)
+  - `CSV_NAME` (default: `cdc_data.csv`)
+  - `CSV_URL` (default: CDC CSV download URL)
+- HTTP downloading
+  - `HTTP_TIMEOUT_CONNECT` (default: `5` seconds)
+  - `HTTP_TIMEOUT_READ` (default: `30` seconds)
+  - `HTTP_CHUNK_SIZE` (default: `16384`)
+- dbt CLI locations
+  - `DBT_PROJECT_DIR` (default: `/opt/airflow/dbt`)
+  - `DBT_PROFILES_DIR` (default: `/opt/airflow/dbt/profiles`)
+  - `DBT_DOCS_PORT` (default: `8082`)
+- dbt project/profile settings
+  - `DBT_PROFILE_NAME` (default: `data_eng_assignment`)
+  - `DBT_TARGET` (default: `dev`) → matches a profile output
+  - `DBT_SCHEMA` (default: `analytics`)
+  - `DBT_DUCKDB_PATH` (default: `/opt/airflow/dbt/warehouse.duckdb`)
+  - `DBT_THREADS` (default: `4`)
+  - `CSV_URI` (optional) → default for `vars.csv_uri` in dbt_project.yml; the DAG passes the file path dynamically at runtime
+
+All of these are read dynamically by the DAG (`dags/config.py`) and dbt templated configs (`dbt/dbt_project.yml`, `dbt/profiles/profiles.yml`). You can override them via environment (e.g., in `docker-compose.yaml` or your shell) without code changes.
+
+---
+
 ## ⚙️ Tech Stack Overview
 
 | Layer | Tool | Purpose |
